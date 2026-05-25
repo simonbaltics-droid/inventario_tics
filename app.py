@@ -4,6 +4,28 @@ from auth import login, registrar
 
 crear_tablas()
 
+import sqlite3
+import bcrypt
+
+conn = sqlite3.connect("inventario.db")
+c = conn.cursor()
+
+# Verificar si ya existe el admin
+c.execute("SELECT * FROM usuarios WHERE correo = 'admin@tic.gov.co'")
+admin = c.fetchone()
+
+if not admin:
+    password = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt())
+
+    c.execute("""
+    INSERT INTO usuarios (correo, password, rol, oficina)
+    VALUES (?, ?, ?, ?)
+    """, ("admin@tic.gov.co", password, "admin", "TIC"))
+
+    conn.commit()
+
+conn.close()
+
 st.title("📊 Inventario Activos TIC")
 
 # Sesión
